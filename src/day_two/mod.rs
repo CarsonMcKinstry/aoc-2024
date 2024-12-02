@@ -11,53 +11,11 @@ fn part_one(input: &str) -> usize {
         .lines()
         .map(|line| {
             line.split_whitespace()
-                .map(|n| n.parse::<u32>().expect("failed to parse value in report"))
-                .collect::<Vec<u32>>()
+                .map(|n| n.parse::<i32>().expect("failed to parse value in report"))
+                .collect::<Vec<i32>>()
         })
-        .filter(report_is_safe_part_one)
+        .filter(report_is_safe)
         .count()
-}
-
-#[derive(PartialEq, Eq)]
-enum Direction {
-    Inc,
-    Dec,
-}
-
-fn report_is_safe_part_one(report: &Vec<u32>) -> bool {
-    let mut direction: Option<Direction> = None;
-
-    for i in 0..report.len() - 1 {
-        let curr = report.get(i).unwrap();
-        let next = report.get(i + 1).unwrap();
-
-        let dif = curr.abs_diff(*next);
-
-        if dif < 1 || dif > 3 {
-            return false;
-        }
-
-        let next_direction = if curr < next {
-            Direction::Inc
-        } else {
-            Direction::Dec
-        };
-
-        match direction {
-            Some(Direction::Dec) => {
-                if next_direction != Direction::Dec {
-                    return false;
-                }
-            }
-            Some(Direction::Inc) => {
-                if next_direction != Direction::Inc {
-                    return false;
-                }
-            }
-            None => direction = Some(next_direction),
-        }
-    }
-    true
 }
 
 fn part_two(input: &str) -> usize {
@@ -65,63 +23,41 @@ fn part_two(input: &str) -> usize {
         .lines()
         .map(|line| {
             line.split_whitespace()
-                .map(|n| n.parse::<u32>().expect("failed to parse value in report"))
-                .collect::<Vec<u32>>()
+                .map(|n| n.parse::<i32>().expect("failed to parse value in report"))
+                .collect::<Vec<i32>>()
         })
-        .filter(report_is_safe_part_two)
+        .filter(report_is_safe_with_dampening)
         .count()
 }
 
-fn report_is_safe_part_two(report: &Vec<u32>) -> bool {
-    let mut bad_level_found = false;
-    let mut direction: Option<Direction> = None;
+fn report_is_safe(report: &Vec<i32>) -> bool {
+    let is_increasing = report.windows(2).all(|w| {
+        let diff = w[1] - w[0];
+        diff >= 1 && diff <= 3
+    });
+    let is_decreasing = report.windows(2).all(|w| {
+        let diff = w[0] - w[1];
+        diff >= 1 && diff <= 3
+    });
 
-    for i in 0..report.len() - 1 {
-        let curr = report.get(i).unwrap();
-        let next = report.get(i + 1).unwrap();
+    is_decreasing || is_increasing
+}
 
-        let dif = curr.abs_diff(*next);
+fn report_is_safe_with_dampening(report: &Vec<i32>) -> bool {
+    if report_is_safe(&report) {
+        return true;
+    }
 
-        if dif < 1 || dif > 3 {
-            if bad_level_found {
-                return false;
-            } else {
-                bad_level_found = true;
-                continue;
-            }
-        }
+    for i in 0..report.len() {
+        let mut dampened_levels = report.clone();
+        dampened_levels.remove(i);
 
-        let next_direction = if curr < next {
-            Direction::Inc
-        } else {
-            Direction::Dec
-        };
-
-        match direction {
-            Some(Direction::Dec) => {
-                if next_direction != Direction::Dec {
-                    if bad_level_found {
-                        return false;
-                    } else {
-                        bad_level_found = true;
-                        continue;
-                    }
-                }
-            }
-            Some(Direction::Inc) => {
-                if next_direction != Direction::Inc {
-                    if bad_level_found {
-                        return false;
-                    } else {
-                        bad_level_found = true;
-                        continue;
-                    }
-                }
-            }
-            None => direction = Some(next_direction),
+        if report_is_safe(&dampened_levels) {
+            return true;
         }
     }
-    true
+
+    false
 }
 
 #[cfg(test)]
