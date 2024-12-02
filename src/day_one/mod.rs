@@ -71,7 +71,7 @@ mod tests {
     const EXAMPLE_INPUT: &str = include_str!("./example_input.txt");
 
     #[test]
-    fn part_one_returns_the_correct_answer() {
+    fn part_one__example_returns_the_correct_answer() {
         let expected = 11;
 
         let actual = super::part_one(EXAMPLE_INPUT);
@@ -80,7 +80,7 @@ mod tests {
     }
 
     #[test]
-    fn part_two_returns_the_correct_answer() {
+    fn part_two_example_returns_the_correct_answer() {
         let expected = 31;
 
         let actual = super::part_two(EXAMPLE_INPUT);
