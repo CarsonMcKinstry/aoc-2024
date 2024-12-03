@@ -24,7 +24,6 @@ fn part_one(input: &str) -> u32 {
 }
 
 fn part_two(input: &str) -> u32 {
-    let sanitized = input.replace('\n', "");
     let mut include = true;
     let mul_re =
         Regex::new(r"mul\((?<lhs>\d{1,3})\,(?<rhs>\d{1,3})\)").expect("failed to create mul regex");
