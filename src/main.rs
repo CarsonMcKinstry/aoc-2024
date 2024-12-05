@@ -1,8 +1,10 @@
-mod day_four;
-mod day_one;
-mod day_three;
-mod day_two;
+mod day1;
+mod day2;
+mod day3;
+mod day4;
+
+mod day5;
 
 fn main() {
-    day_four::run();
+    day4::run();
 }
