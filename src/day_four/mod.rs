@@ -4,6 +4,28 @@ use regex::{Captures, Match, Regex};
 
 const PUZZLE_INPUT: &str = include_str!("./puzzle_input.txt");
 
+type Direction = [(i32, i32); 4];
+
+const DIRECTIONS: [Direction; 8] = [
+    // (x, y)
+    // nw
+    [(0, 0), (-1, -1), (-2, -2), (-3, -3)],
+    // n
+    [(0, 0), (0, -1), (0, -2), (0, -3)],
+    // ne
+    [(0, 0), (1, -1), (2, -2), (3, -3)],
+    // e
+    [(0, 0), (1, 0), (2, 0), (3, 0)],
+    // se
+    [(0, 0), (1, 1), (2, 2), (3, 3)],
+    // s
+    [(0, 0), (0, 1), (0, 2), (0, 3)],
+    // sw
+    [(0, 0), (-1, 1), (-2, 2), (-3, 3)],
+    // w
+    [(0, 0), (-1, 0), (-2, 0), (-3, 0)],
+];
+
 pub(crate) fn run() {
     println!("===== DAY THREE =====");
     println!("Part 1: {:?}", part_one(PUZZLE_INPUT));
@@ -23,120 +45,36 @@ fn part_one(input: &str) -> u32 {
 
     for y in 0..column_length {
         for x in 0..line_length {
-            let current_character = matrix[y][x].clone();
-            let can_north = y >= 3;
-            let can_west = x >= 3;
-            let can_south = y < column_length - 3;
-            let can_east = x < line_length - 3;
+            for direction in DIRECTIONS {
+                let string = check_direction(&matrix, x, y, &direction);
 
-            let mut strings: Vec<String> = vec![];
-
-            // nw
-            if can_west && can_north {
-                strings.push(
-                    vec![
-                        current_character.clone(),
-                        matrix[y - 1][x - 1].clone(),
-                        matrix[y - 2][x - 2].clone(),
-                        matrix[y - 3][x - 3].clone(),
-                    ]
-                    .join(""),
-                );
+                if string == "XMAS" {
+                    total += 1
+                }
             }
-            // n
-            if can_north {
-                strings.push(
-                    vec![
-                        current_character.clone(),
-                        matrix[y - 1][x].clone(),
-                        matrix[y - 2][x].clone(),
-                        matrix[y - 3][x].clone(),
-                    ]
-                    .join(""),
-                );
-            }
-            // ne
-            if can_north && can_east {
-                strings.push(
-                    vec![
-                        current_character.clone(),
-                        matrix[y - 1][x + 1].clone(),
-                        matrix[y - 2][x + 2].clone(),
-                        matrix[y - 3][x + 3].clone(),
-                    ]
-                    .join(""),
-                );
-            }
-            // e
-            if can_east {
-                strings.push(
-                    vec![
-                        current_character.clone(),
-                        matrix[y][x + 1].clone(),
-                        matrix[y][x + 2].clone(),
-                        matrix[y][x + 3].clone(),
-                    ]
-                    .join(""),
-                );
-            }
-            // se
-            if can_south && can_east {
-                strings.push(
-                    vec![
-                        current_character.clone(),
-                        matrix[y + 1][x + 1].clone(),
-                        matrix[y + 2][x + 2].clone(),
-                        matrix[y + 3][x + 3].clone(),
-                    ]
-                    .join(""),
-                );
-            }
-
-            // s
-            if can_south {
-                strings.push(
-                    vec![
-                        current_character.clone(),
-                        matrix[y + 1][x].clone(),
-                        matrix[y + 2][x].clone(),
-                        matrix[y + 3][x].clone(),
-                    ]
-                    .join(""),
-                );
-            }
-            // sw
-            if can_south && can_west {
-                strings.push(
-                    vec![
-                        current_character.clone(),
-                        matrix[y + 1][x - 1].clone(),
-                        matrix[y + 2][x - 2].clone(),
-                        matrix[y + 3][x - 3].clone(),
-                    ]
-                    .join(""),
-                );
-            }
-            // w
-            if can_west {
-                strings.push(
-                    vec![
-                        current_character.clone(),
-                        matrix[y][x - 1].clone(),
-                        matrix[y][x - 2].clone(),
-                        matrix[y][x - 3].clone(),
-                    ]
-                    .join(""),
-                );
-            }
-
-            total += strings
-                .iter()
-                .filter(|chars| **chars == String::from("XMAS"))
-                .count() as u32;
         }
     }
 
     total
+}
+
+fn get_matrix_char(matrix: &Vec<Vec<String>>, x: usize, y: usize) -> String {
+    matrix
+        .get(y)
+        .and_then(|line| line.get(x))
+        .cloned()
+        .unwrap_or_default()
+}
+
+fn check_direction(matrix: &Vec<Vec<String>>, x: usize, y: usize, direction: &Direction) -> String {
+    direction
+        .iter()
+        .map(|&(d_x, d_y)| {
+            let new_x = (x as i32 + d_x) as usize;
+            let new_y = (y as i32 + d_y) as usize;
+            get_matrix_char(matrix, new_x, new_y)
+        })
+        .collect()
 }
 
 fn part_two(input: &str) -> u32 {
