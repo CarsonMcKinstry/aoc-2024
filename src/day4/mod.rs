@@ -42,7 +42,7 @@ fn part_one(input: &str) -> u32 {
     for y in 0..column_length {
         for x in 0..line_length {
             for direction in DIRECTIONS {
-                let string = check_direction(&matrix, x, y, &direction);
+                let string = check_direction(&matrix, x, y, &direction, 3);
                 if string == "XMAS" {
                     total += 1
                 }
@@ -61,8 +61,14 @@ fn get_matrix_char(matrix: &Vec<Vec<String>>, x: usize, y: usize) -> String {
         .unwrap_or_default()
 }
 
-fn check_direction(matrix: &Vec<Vec<String>>, x: usize, y: usize, direction: &Direction) -> String {
-    (0..=3)
+fn check_direction(
+    matrix: &Vec<Vec<String>>,
+    x: usize,
+    y: usize,
+    direction: &Direction,
+    count: i32,
+) -> String {
+    (0..=count)
         .map(|step| {
             let x = (x as i32 + step * direction.0) as usize;
             let y = (y as i32 + step * direction.1) as usize;
@@ -84,14 +90,8 @@ fn part_two(input: &str) -> u32 {
 
     for y in 0..column_length - 2 {
         for x in 0..line_length - 2 {
-            let tl = matrix[y][x].as_str();
-            let tr = matrix[y][x + 2].as_str();
-            let c = matrix[y + 1][x + 1].as_str();
-            let bl = matrix[y + 2][x].as_str();
-            let br = matrix[y + 2][x + 2].as_str();
-
-            let forward_slash = format!("{tl}{c}{br}");
-            let back_slash = format!("{tr}{c}{bl}");
+            let forward_slash = check_direction(&matrix, x, y, &(1, 1), 2);
+            let back_slash = check_direction(&matrix, x + 2, y, &(-1, 1), 2);
 
             let mas = String::from("MAS");
             let sam = String::from("SAM");
