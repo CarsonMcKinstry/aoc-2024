@@ -1,29 +1,25 @@
-use std::f32::consts::E;
-
-use regex::{Captures, Match, Regex};
-
 const PUZZLE_INPUT: &str = include_str!("./puzzle_input.txt");
 
-type Direction = [(i32, i32); 4];
+type Direction = (i32, i32);
 
 const DIRECTIONS: [Direction; 8] = [
     // (x, y)
     // nw
-    [(0, 0), (-1, -1), (-2, -2), (-3, -3)],
+    (-1, -1),
     // n
-    [(0, 0), (0, -1), (0, -2), (0, -3)],
+    (0, -1),
     // ne
-    [(0, 0), (1, -1), (2, -2), (3, -3)],
+    (1, -1),
     // e
-    [(0, 0), (1, 0), (2, 0), (3, 0)],
+    (1, 0),
     // se
-    [(0, 0), (1, 1), (2, 2), (3, 3)],
+    (1, 1),
     // s
-    [(0, 0), (0, 1), (0, 2), (0, 3)],
+    (0, 1),
     // sw
-    [(0, 0), (-1, 1), (-2, 2), (-3, 3)],
+    (-1, 1),
     // w
-    [(0, 0), (-1, 0), (-2, 0), (-3, 0)],
+    (-1, 0),
 ];
 
 pub(crate) fn run() {
@@ -47,7 +43,6 @@ fn part_one(input: &str) -> u32 {
         for x in 0..line_length {
             for direction in DIRECTIONS {
                 let string = check_direction(&matrix, x, y, &direction);
-
                 if string == "XMAS" {
                     total += 1
                 }
@@ -67,12 +62,11 @@ fn get_matrix_char(matrix: &Vec<Vec<String>>, x: usize, y: usize) -> String {
 }
 
 fn check_direction(matrix: &Vec<Vec<String>>, x: usize, y: usize, direction: &Direction) -> String {
-    direction
-        .iter()
-        .map(|&(d_x, d_y)| {
-            let new_x = (x as i32 + d_x) as usize;
-            let new_y = (y as i32 + d_y) as usize;
-            get_matrix_char(matrix, new_x, new_y)
+    (0..=3)
+        .map(|step| {
+            let x = (x as i32 + step * direction.0) as usize;
+            let y = (y as i32 + step * direction.1) as usize;
+            get_matrix_char(matrix, x, y)
         })
         .collect()
 }
