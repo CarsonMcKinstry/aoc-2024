@@ -1,8 +1,8 @@
+use crate::models::matrix::Matrix;
+
 const PUZZLE_INPUT: &str = include_str!("./puzzle_input.txt");
 
 type Direction = (i32, i32);
-
-struct Matrix(Vec<Vec<String>>);
 
 const DIRECTIONS: [Direction; 8] = [
     // (x, y)
@@ -30,73 +30,22 @@ pub(crate) fn run() {
     println!("Part 2: {:?}", part_two(PUZZLE_INPUT));
 }
 
-impl Matrix {
-    fn n_columns(&self) -> usize {
-        self.0.first().map(|f| f.len()).unwrap()
-    }
-
-    fn n_rows(&self) -> usize {
-        self.0.len()
-    }
-
-    fn get(&self, x: usize, y: usize) -> String {
-        self.0
-            .get(y)
-            .and_then(|line| line.get(x))
-            .cloned()
-            .unwrap_or_default()
-    }
-
-    fn pairs(&self) -> MatrixCoordinates {
-        MatrixCoordinates {
-            matrix: self,
-            row: 0,
-            col: 0,
-        }
-    }
-}
-
-impl From<Vec<Vec<String>>> for Matrix {
-    fn from(value: Vec<Vec<String>>) -> Self {
-        Self(value)
-    }
-}
-
-impl From<&str> for Matrix {
+impl From<&str> for Matrix<String> {
     fn from(value: &str) -> Self {
-        Self(
-            value
-                .lines()
-                .map(|line| line.chars().map(|c| c.to_string()).collect::<Vec<String>>())
-                .collect::<Vec<Vec<String>>>(),
-        )
-    }
-}
+        let mut nodes: Vec<Vec<String>> = Vec::new();
 
-struct MatrixCoordinates<'a> {
-    matrix: &'a Matrix,
-    row: usize,
-    col: usize,
-}
+        let mut curr_line: Vec<String> = Vec::new();
 
-impl<'a> Iterator for MatrixCoordinates<'a> {
-    type Item = (usize, usize);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.row >= self.matrix.n_rows() {
-            return None;
+        for c in value.chars() {
+            if c == '\n' {
+                nodes.push(curr_line);
+                curr_line = Vec::new();
+            } else {
+                curr_line.push(c.to_string());
+            }
         }
 
-        let result = (self.row, self.col);
-
-        self.col += 1;
-
-        if self.col >= self.matrix.n_columns() {
-            self.col = 0;
-            self.row += 1;
-        }
-
-        Some(result)
+        Self::from(nodes)
     }
 }
 
@@ -118,7 +67,7 @@ fn part_one(input: &str) -> u32 {
 }
 
 fn check_direction(
-    matrix: &Matrix,
+    matrix: &Matrix<String>,
     x: usize,
     y: usize,
     direction: &Direction,
