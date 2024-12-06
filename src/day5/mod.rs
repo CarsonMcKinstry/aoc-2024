@@ -8,6 +8,8 @@ pub(crate) fn run() {
     println!("Part 2: {:?}", part_two(PUZZLE_INPUT));
 }
 
+type PrintOrders = Vec<Vec<u32>>;
+
 struct OrderingRules(HashMap<u32, Vec<u32>>);
 
 impl OrderingRules {
@@ -71,6 +73,27 @@ impl From<&&str> for OrderingRules {
 }
 
 fn part_one(input: &str) -> u32 {
+    let (ordering_rules, print_orders) = parse_input(input);
+
+    print_orders
+        .iter()
+        .filter(|order| ordering_rules.is_valid_order(order))
+        .map(take_middle)
+        .sum()
+}
+
+fn part_two(input: &str) -> u32 {
+    let (ordering_rules, print_orders) = parse_input(input);
+
+    print_orders
+        .iter()
+        .filter(|order| !ordering_rules.is_valid_order(order))
+        .map(|order| ordering_rules.repair_order(order))
+        .map(|order| take_middle(&order))
+        .sum()
+}
+
+fn parse_input(input: &str) -> (OrderingRules, PrintOrders) {
     let split = input.split("\n\n").take(2).collect::<Vec<&str>>();
 
     let ordering_rules = split
@@ -78,7 +101,7 @@ fn part_one(input: &str) -> u32 {
         .map(OrderingRules::from)
         .expect("Failed to get ordering rules");
 
-    split
+    let print_orders = split
         .get(1)
         .map(|orders| {
             orders
@@ -92,11 +115,9 @@ fn part_one(input: &str) -> u32 {
                 })
                 .collect::<Vec<Vec<u32>>>()
         })
-        .expect("Failed to get print orders")
-        .iter()
-        .filter(|order| ordering_rules.is_valid_order(order))
-        .map(take_middle)
-        .sum()
+        .expect("Failed to get print orders");
+
+    (ordering_rules, print_orders)
 }
 
 fn take_middle(order: &Vec<u32>) -> u32 {
@@ -105,36 +126,6 @@ fn take_middle(order: &Vec<u32>) -> u32 {
     *order
         .get(middle_index)
         .expect("unable to find the middle value")
-}
-
-fn part_two(input: &str) -> u32 {
-    let split = input.split("\n\n").take(2).collect::<Vec<&str>>();
-
-    let ordering_rules = split
-        .get(0)
-        .map(OrderingRules::from)
-        .expect("Failed to get ordering rules");
-
-    split
-        .get(1)
-        .map(|orders| {
-            orders
-                .lines()
-                .map(|line| {
-                    line.split(",")
-                        .map(|page_number| {
-                            page_number.parse().expect("failed to parse page number")
-                        })
-                        .collect()
-                })
-                .collect::<Vec<Vec<u32>>>()
-        })
-        .expect("Failed to get print orders")
-        .iter()
-        .filter(|order| !ordering_rules.is_valid_order(order))
-        .map(|order| ordering_rules.repair_order(order))
-        .map(|order| take_middle(&order))
-        .sum()
 }
 
 #[cfg(test)]
