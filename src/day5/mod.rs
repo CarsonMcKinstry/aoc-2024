@@ -1,4 +1,7 @@
-use std::{cmp::Ordering, collections::HashMap};
+use std::{
+    cmp::Ordering,
+    collections::{HashMap, HashSet},
+};
 
 const PUZZLE_INPUT: &str = include_str!("./puzzle_input.txt");
 
@@ -10,10 +13,10 @@ pub(crate) fn run() {
 
 type PrintOrders = Vec<Vec<u32>>;
 
-struct OrderingRules(HashMap<u32, Vec<u32>>);
+struct OrderingRules(HashMap<u32, HashSet<u32>>);
 
 impl OrderingRules {
-    fn get(&self, page_number: u32) -> Option<&Vec<u32>> {
+    fn get(&self, page_number: u32) -> Option<&HashSet<u32>> {
         self.0.get(&page_number)
     }
 
@@ -53,7 +56,7 @@ impl OrderingRules {
 
 impl From<&&str> for OrderingRules {
     fn from(value: &&str) -> Self {
-        let mut map: HashMap<u32, Vec<u32>> = HashMap::new();
+        let mut map: HashMap<u32, HashSet<u32>> = HashMap::new();
 
         for line in value.lines() {
             let temp = line
@@ -65,7 +68,7 @@ impl From<&&str> for OrderingRules {
             let key = *temp.get(0).expect("failed to get key");
             let value = *temp.get(1).expect("failed to get value");
 
-            map.entry(key).or_insert_with(Vec::new).push(value);
+            map.entry(key).or_insert_with(HashSet::new).insert(value);
         }
 
         Self(map)
