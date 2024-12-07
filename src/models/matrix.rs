@@ -77,7 +77,7 @@ impl<'a, T: Default + Clone> Iterator for MatrixCoordinates<'a, T> {
     type Item = (usize, usize);
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.row > self.matrix.n_rows() {
+        if self.row >= self.matrix.n_rows() {
             return None;
         }
 
