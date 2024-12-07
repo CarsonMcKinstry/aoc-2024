@@ -6,7 +6,7 @@ use std::{
 const PUZZLE_INPUT: &str = include_str!("./puzzle_input.txt");
 
 pub(crate) fn run() {
-    println!("===== DAY THREE =====");
+    println!("===== DAY FIVE =====");
     println!("Part 1: {:?}", part_one(PUZZLE_INPUT));
     println!("Part 2: {:?}", part_two(PUZZLE_INPUT));
 }

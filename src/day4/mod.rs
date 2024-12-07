@@ -25,28 +25,9 @@ const DIRECTIONS: [Direction; 8] = [
 ];
 
 pub(crate) fn run() {
-    println!("===== DAY THREE =====");
+    println!("===== DAY FOUR =====");
     println!("Part 1: {:?}", part_one(PUZZLE_INPUT));
     println!("Part 2: {:?}", part_two(PUZZLE_INPUT));
-}
-
-impl From<&str> for Matrix<String> {
-    fn from(value: &str) -> Self {
-        let mut nodes: Vec<Vec<String>> = Vec::new();
-
-        let mut curr_line: Vec<String> = Vec::new();
-
-        for c in value.chars() {
-            if c == '\n' {
-                nodes.push(curr_line);
-                curr_line = Vec::new();
-            } else {
-                curr_line.push(c.to_string());
-            }
-        }
-
-        Self::from(nodes)
-    }
 }
 
 fn part_one(input: &str) -> u32 {
