@@ -1,3 +1,5 @@
+use super::position::Position;
+
 pub(crate) struct Matrix<T>(Vec<Vec<T>>);
 
 impl<T: Default + Clone> Matrix<T> {
@@ -11,8 +13,8 @@ impl<T: Default + Clone> Matrix<T> {
 
     pub(crate) fn get_bounding_box(&self) -> BoundingBox {
         BoundingBox {
-            top_left: (0, 0),
-            bottom_right: (self.n_columns() - 1, self.n_rows() - 1),
+            top_left: Position::new(0, 0),
+            bottom_right: Position::new(self.n_columns() - 1, self.n_rows() - 1),
         }
     }
 
@@ -48,12 +50,12 @@ impl<T: Default + Clone> Matrix<T> {
         }
     }
 
-    pub(crate) fn find_position_by(&self, pred: fn(T) -> bool) -> Option<(usize, usize)> {
+    pub(crate) fn find_position_by(&self, pred: fn(T) -> bool) -> Option<Position> {
         for (x, y) in self.pairs() {
             let value = self.get(x, y);
 
             if pred(value) {
-                return Some((x, y));
+                return Some(Position::new(x, y));
             }
         }
 
@@ -128,14 +130,17 @@ pub(crate) struct MatrixIteratorWithPos<'a, T: Default + Clone> {
 }
 
 impl<'a, T: Default + Clone> Iterator for MatrixIteratorWithPos<'a, T> {
-    type Item = (T, (usize, usize));
+    type Item = (T, Position);
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.row > self.matrix.n_rows() {
             return None;
         }
 
-        let result = (self.matrix.get(self.col, self.row), (self.col, self.row));
+        let result = (
+            self.matrix.get(self.col, self.row),
+            Position::new(self.col, self.row),
+        );
 
         self.col += 1;
 
@@ -150,8 +155,8 @@ impl<'a, T: Default + Clone> Iterator for MatrixIteratorWithPos<'a, T> {
 
 #[derive(Default)]
 pub(crate) struct BoundingBox {
-    pub(crate) top_left: (usize, usize),
-    pub(crate) bottom_right: (usize, usize),
+    pub(crate) top_left: Position,
+    pub(crate) bottom_right: Position,
 }
 
 impl From<&str> for Matrix<String> {
