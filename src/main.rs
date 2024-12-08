@@ -6,9 +6,10 @@ mod day5;
 
 mod day6;
 mod day7;
+mod day8;
 
 mod models;
 
 fn main() {
-    day7::run();
+    day8::run();
 }
