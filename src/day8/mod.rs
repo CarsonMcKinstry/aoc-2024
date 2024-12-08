@@ -122,42 +122,20 @@ fn part_two(input: &str) -> usize {
 
     // for each set of antennas for each antenna type
     for coords in antennas.values() {
-        if coords.len() > 1 {
-            antinode_positions.extend(coords.iter());
-        }
-
         for (i, a) in coords.iter().enumerate() {
             for b in coords.iter().skip(i + 1) {
                 let d = if a < b { *b - *a } else { *a - *b };
 
-                if a < b {
-                    let mut point = *a - d;
+                let (mut upper, mut lower) = if a < b { (*a, *b) } else { (*b, *a) };
 
-                    while bounding_box.contains(point) {
-                        antinode_positions.insert(point);
-                        point -= d;
-                    }
+                while bounding_box.contains(upper) {
+                    antinode_positions.insert(upper);
+                    upper -= d;
+                }
 
-                    let mut point = *b + d;
-
-                    while bounding_box.contains(point) {
-                        antinode_positions.insert(point);
-                        point += d;
-                    }
-                } else {
-                    let mut point = *b - d;
-
-                    while bounding_box.contains(point) {
-                        antinode_positions.insert(point);
-                        point -= d;
-                    }
-
-                    let mut point = *a + d;
-
-                    while bounding_box.contains(point) {
-                        antinode_positions.insert(point);
-                        point += d;
-                    }
+                while bounding_box.contains(lower) {
+                    antinode_positions.insert(lower);
+                    lower += d;
                 }
             }
         }
