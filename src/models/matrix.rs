@@ -159,6 +159,15 @@ pub(crate) struct BoundingBox {
     pub(crate) bottom_right: Position,
 }
 
+impl BoundingBox {
+    pub fn contains(&self, position: &Position) -> bool {
+        position.x() >= self.top_left.x()
+            && position.y() >= self.top_left.y()
+            && position.x() <= self.bottom_right.x()
+            && position.y() <= self.bottom_right.y()
+    }
+}
+
 impl From<&str> for Matrix<String> {
     fn from(value: &str) -> Self {
         let mut nodes: Vec<Vec<String>> = Vec::new();

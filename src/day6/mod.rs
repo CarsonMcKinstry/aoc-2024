@@ -2,7 +2,7 @@ use std::{cmp::Ordering, collections::HashSet, hash::Hash};
 
 use rayon::prelude::*;
 
-use crate::models::position::Position;
+use crate::models::position::{Distance, Position};
 
 use std::time::Instant;
 
@@ -72,7 +72,6 @@ fn walk_the_guard(
         finished: false,
         next_direction: Direction::North,
         next_position: initial_position.clone(),
-        visited: HashSet::new(),
     };
 
     while !walk_result.finished {
@@ -94,7 +93,7 @@ fn walk_the_guard(
             bounding_box,
         );
 
-        visited.extend(walk_result.visited.iter().cloned())
+        visited.insert(walk_result.next_position);
     }
 
     Some(visited)
@@ -153,53 +152,33 @@ fn walk(
 ) -> WalkResult {
     let mut visited: HashSet<Position> = HashSet::new();
 
-    if let Some(obstacle_position) = find_next_obstacle(obstacles, current_position, &direction) {
-        let distance = current_position.distance_to(&obstacle_position);
+    let next_position = match direction {
+        Direction::North => current_position.add(0, -1),
+        Direction::East => current_position.add(1, 0),
+        Direction::South => current_position.add(0, 1),
+        Direction::West => current_position.add(-1, 0),
+    };
 
-        let distance = match direction {
-            Direction::East | Direction::West => distance.x(),
-            Direction::North | Direction::South => distance.y(),
+    if !bounding_box.contains(&next_position) {
+        return WalkResult {
+            next_position: current_position.clone(),
+            finished: true,
+            next_direction: direction.clone(),
         };
+    }
 
-        let mut new_position = current_position.clone();
-
-        for _ in 0..distance - 1 {
-            let next_position = walk_forward(&new_position, direction);
-
-            visited.insert(next_position.clone());
-
-            new_position = next_position.clone();
-        }
-
-        WalkResult {
-            next_position: new_position,
+    if obstacles.contains(&next_position) {
+        return WalkResult {
+            next_position: current_position.clone(),
             finished: false,
             next_direction: direction.turn_right(),
-            visited,
-        }
-    } else {
-        let distance = match direction {
-            Direction::North => current_position.distance_to(&bounding_box.top_left).y(),
-            Direction::East => current_position.distance_to(&bounding_box.bottom_right).x(),
-            Direction::South => current_position.distance_to(&bounding_box.bottom_right).y(),
-            Direction::West => current_position.distance_to(&bounding_box.top_left).x(),
         };
+    }
 
-        let mut new_position = current_position.clone();
-
-        for _ in 0..distance {
-            let next_position = walk_forward(&new_position, direction);
-
-            visited.insert(next_position.clone());
-            new_position = next_position.clone();
-        }
-
-        WalkResult {
-            next_position: new_position,
-            finished: true,
-            visited,
-            next_direction: direction.turn_right(),
-        }
+    WalkResult {
+        next_position,
+        finished: false,
+        next_direction: direction.clone(),
     }
 }
 
@@ -237,7 +216,7 @@ struct WalkResult {
     next_position: Position,
     finished: bool,
     next_direction: Direction,
-    visited: HashSet<Position>,
+    // visited: HashSet<Position>,
 }
 
 #[cfg(test)]
