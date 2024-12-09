@@ -43,6 +43,12 @@ fn part_one(input: &str) -> u64 {
 }
 
 fn part_two(input: &str) -> u64 {
+    let mut memory_map = get_memory_map(input);
+
+    let blocks = get_blocks_from_memory_map(&memory_map);
+
+    println!("{:?}", blocks);
+
     0
 }
 
@@ -67,6 +73,55 @@ fn get_memory_map(input: &str) -> Vec<Option<u64>> {
         })
         .flatten()
         .collect()
+}
+
+#[derive(Debug)]
+struct FileBlock(Option<u64>, usize, usize);
+
+impl FileBlock {
+    pub fn new(id: Option<u64>, start_index: usize, size: usize) -> Self {
+        Self(id, start_index, size)
+    }
+
+    pub fn id(&self) -> Option<u64> {
+        self.0
+    }
+
+    pub fn start(&self) -> usize {
+        self.1
+    }
+
+    pub fn size(&self) -> usize {
+        self.2
+    }
+
+    pub fn increaseSize(&self) -> Self {
+        Self(self.id(), self.start(), self.size() + 1)
+    }
+}
+
+fn get_blocks_from_memory_map(memory_map: &Vec<Option<u64>>) -> Vec<FileBlock> {
+    let mut file_blocks: Vec<FileBlock> = Vec::new();
+
+    let mut file_block: Option<FileBlock> = None;
+
+    for (i, value) in memory_map.iter().enumerate() {
+        file_block = match file_block {
+            Some(fb) => {
+                if *value == fb.id() {
+                    Some(fb.increaseSize())
+                } else {
+                    file_blocks.push(fb);
+                    Some(FileBlock::new(*value, i, 1))
+                }
+            }
+            None => Some(FileBlock::new(*value, i, 1)),
+        }
+    }
+
+    file_blocks.push(file_block.unwrap());
+
+    file_blocks
 }
 
 #[cfg(test)]
