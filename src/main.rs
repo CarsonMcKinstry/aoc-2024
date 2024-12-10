@@ -1,3 +1,4 @@
+#![allow(warnings)]
 mod day1;
 mod day10;
 mod day2;
@@ -12,5 +13,5 @@ mod day9;
 mod models;
 
 fn main() {
-    day10::run();
+    day9::run();
 }

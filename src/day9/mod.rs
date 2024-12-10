@@ -47,9 +47,39 @@ fn part_two(input: &str) -> u64 {
 
     let blocks = get_blocks_from_memory_map(&memory_map);
 
-    println!("{:?}", blocks);
+    let mut empty_blocks = blocks
+        .iter()
+        .filter(|block| block.id().is_none())
+        .copied()
+        .collect::<Vec<FileBlock>>();
+    let filled_blocks = blocks
+        .iter()
+        .filter(|block| block.id().is_some())
+        .rev()
+        .copied()
+        .collect::<Vec<FileBlock>>();
 
-    0
+    for filled_block in filled_blocks {
+        for empty_block in &mut empty_blocks {
+            if empty_block.size() >= filled_block.size()
+                && empty_block.start() < filled_block.start()
+            {
+                for j in 0..filled_block.size() {
+                    memory_map[empty_block.start() + j] = filled_block.id();
+                    memory_map[filled_block.start() + j] = None;
+                }
+
+                empty_block.decrease_size(filled_block.size());
+                break;
+            }
+        }
+    }
+
+    memory_map
+        .iter()
+        .enumerate()
+        .filter_map(|(i, node)| node.map(|n| n * i as u64))
+        .sum()
 }
 
 fn get_memory_map(input: &str) -> Vec<Option<u64>> {
@@ -75,8 +105,8 @@ fn get_memory_map(input: &str) -> Vec<Option<u64>> {
         .collect()
 }
 
-#[derive(Debug)]
-struct FileBlock(Option<u64>, usize, usize);
+#[derive(Debug, Copy, Clone)]
+struct FileBlock(pub Option<u64>, pub usize, pub usize);
 
 impl FileBlock {
     pub fn new(id: Option<u64>, start_index: usize, size: usize) -> Self {
@@ -95,8 +125,13 @@ impl FileBlock {
         self.2
     }
 
-    pub fn increaseSize(&self) -> Self {
+    pub fn increase_size(&self) -> Self {
         Self(self.id(), self.start(), self.size() + 1)
+    }
+
+    pub fn decrease_size(&mut self, n: usize) {
+        self.1 += n;
+        self.2 -= n;
     }
 }
 
@@ -109,7 +144,7 @@ fn get_blocks_from_memory_map(memory_map: &Vec<Option<u64>>) -> Vec<FileBlock> {
         file_block = match file_block {
             Some(fb) => {
                 if *value == fb.id() {
-                    Some(fb.increaseSize())
+                    Some(fb.increase_size())
                 } else {
                     file_blocks.push(fb);
                     Some(FileBlock::new(*value, i, 1))

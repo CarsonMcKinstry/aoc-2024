@@ -105,7 +105,7 @@ fn find_unique_paths(
             if *value == current_value + 1 && !path.contains(&point) {
                 path.push(point);
 
-                let result = find_unique_paths(*value, &point, map, path, unique_paths);
+                find_unique_paths(*value, &point, map, path, unique_paths);
 
                 path.pop();
             }
