@@ -5,7 +5,7 @@ use std::{
 };
 
 #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
-pub struct Point(i32, i32);
+pub struct Point(pub i32, pub i32);
 
 impl Point {
     pub fn x(&self) -> i32 {
@@ -14,6 +14,14 @@ impl Point {
 
     pub fn y(&self) -> i32 {
         self.1
+    }
+
+    pub fn x_usize(&self) -> usize {
+        self.0 as usize
+    }
+
+    pub fn y_usize(&self) -> usize {
+        self.1 as usize
     }
 
     pub fn diff(&self, rhs: &Point) -> Point {
