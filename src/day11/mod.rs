@@ -30,30 +30,24 @@ fn blink(stones: HashMap<u64, u64>, n_blinks: usize, curr_blinks: usize) -> Hash
         return stones;
     }
 
-    let mut new_stones = HashMap::new();
-
-    for (stone, value) in stones {
-        let num = format!("{}", stone);
-        match stone {
-            0 => *new_stones.entry(1).or_default() += value,
-            stone => {
-                let n_digits = count_digits(&stone);
-
-                if n_digits % 2 > 0 {
-                    *new_stones.entry(2024 * stone).or_default() += value;
+    let mut new_stones = HashMap::with_capacity(stones.len());
+    for (k, v) in stones {
+        let num = format!("{}", k);
+        match k {
+            0 => *new_stones.entry(1).or_default() += v,
+            1 => *new_stones.entry(2024).or_default() += v,
+            _ => {
+                if num.len() % 2 > 0 {
+                    *new_stones.entry(2024 * k).or_default() += v;
                 } else {
-                    let factor = 10u64.pow(n_digits);
-
-                    let left = stone / factor;
-                    let right = stone % factor;
-
-                    *new_stones.entry(left).or_default() += value;
-                    *new_stones.entry(right).or_default() += value;
+                    let l: u64 = num[..num.len() / 2].parse().unwrap();
+                    let r: u64 = num[num.len() / 2..].parse().unwrap();
+                    *new_stones.entry(l).or_default() += v;
+                    *new_stones.entry(r).or_default() += v;
                 }
             }
         };
     }
-
     blink(new_stones, n_blinks, curr_blinks + 1)
 }
 
