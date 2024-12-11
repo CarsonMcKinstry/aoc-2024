@@ -1,4 +1,7 @@
-use std::{collections::HashSet, time::Instant};
+use std::{
+    collections::{HashMap, HashSet},
+    time::Instant,
+};
 
 const PUZZLE_INPUT: &str = include_str!("./puzzle_input.txt");
 
@@ -12,16 +15,46 @@ pub(crate) fn run() {
     println!("({:.2?}) Part 2: {:?}", now.elapsed(), part_two_result);
 }
 
-fn part_one(input: &str, n_blinks: usize) -> usize {
-    input
-        .split_whitespace()
-        .map(|stone| stone.parse::<u64>().expect("failed to parse stone"))
-        .flat_map(|stone| mutate_stone(&stone, n_blinks, 0))
-        .count()
+fn part_one(input: &str, n_blinks: usize) -> u64 {
+    let mut stones: HashMap<u64, u64> = HashMap::new();
+    for stone in input.split_whitespace() {
+        let num: u64 = stone.parse().expect("Input contains a non-integer value");
+        *stones.entry(num).or_insert(0) += 1;
+    }
+
+    blink(stones, n_blinks, 0).values().sum()
 }
 
-fn part_two(input: &str) -> usize {
-    0
+fn blink(stones: HashMap<u64, u64>, n_blinks: usize, curr_blinks: usize) -> HashMap<u64, u64> {
+    if curr_blinks == n_blinks {
+        return stones;
+    }
+
+    let mut new_stones = HashMap::new();
+
+    for (stone, value) in stones {
+        let num = format!("{}", stone);
+        match stone {
+            0 => *new_stones.entry(1).or_default() += value,
+            stone => {
+                let n_digits = count_digits(&stone);
+
+                if n_digits % 2 > 0 {
+                    *new_stones.entry(2024 * stone).or_default() += value;
+                } else {
+                    let factor = 10u64.pow(n_digits);
+
+                    let left = stone / factor;
+                    let right = stone % factor;
+
+                    *new_stones.entry(left).or_default() += value;
+                    *new_stones.entry(right).or_default() += value;
+                }
+            }
+        };
+    }
+
+    blink(new_stones, n_blinks, curr_blinks + 1)
 }
 
 fn count_digits(n: &u64) -> u32 {
@@ -30,45 +63,15 @@ fn count_digits(n: &u64) -> u32 {
 
     while temp > 0 {
         n_digits += 1;
-        temp /= 10
+        temp /= 10;
     }
 
     n_digits
 }
 
-fn mutate_stone(stone: &u64, n_blinks: usize, current_blinks: usize) -> Vec<u64> {
-    if n_blinks == current_blinks {
-        return vec![*stone];
-    }
-
-    let num_digits = count_digits(&stone);
-
-    let next_stones = if stone == &0 {
-        vec![1]
-    } else if num_digits % 2 == 0 {
-        let split_index = num_digits / 2;
-        let factor = 10u64.pow(split_index);
-
-        let left = stone / factor;
-        let right = stone % factor;
-
-        vec![left, right]
-    } else {
-        vec![stone * 2024]
-    };
-
-    next_stones
-        .iter()
-        .flat_map(|stone| {
-            let next = mutate_stone(stone, n_blinks, current_blinks + 1);
-            return next;
-        })
-        .collect()
-}
-
 #[cfg(test)]
 mod tests {
-    use super::{part_one, part_two};
+    use super::part_one;
     const EXAMPLE_INPUT: &str = include_str!("./example_input.txt");
 
     mod part_one {
@@ -90,35 +93,6 @@ mod tests {
             let actual = super::part_one(EXAMPLE_INPUT, 6);
 
             assert_eq!(actual, expected);
-        }
-    }
-
-    mod mutate_stones {
-        #[test]
-        fn mutate_stone_with_0_once() {
-            let expected = vec![1];
-
-            let actual = super::super::mutate_stone(&0, 1, 0);
-
-            assert_eq!(expected, actual);
-        }
-
-        #[test]
-        fn mutate_stone_with_0_twice() {
-            let expected = vec![2024];
-
-            let actual = super::super::mutate_stone(&0, 2, 0);
-
-            assert_eq!(expected, actual);
-        }
-
-        #[test]
-        fn mutate_stone_with_0_thrice() {
-            let expected = vec![20, 24];
-
-            let actual = super::super::mutate_stone(&0, 3, 0);
-
-            assert_eq!(expected, actual);
         }
     }
 }
