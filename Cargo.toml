@@ -7,3 +7,4 @@ edition = "2021"
 ntest = "0.9.3"
 rayon = "1.10.0"
 regex = "1.11.1"
+time_it = { path = "./time_it" }
